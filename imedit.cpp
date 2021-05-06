@@ -100,6 +100,8 @@ void End() {
     }
     // draw cursor
     auto cursor_upper_left = positions[y + 1];
+    cursor_upper_left.x +=
+        ImGui::CalcTextSize(data[current_editor][y].substr(0, x).c_str()).x;
     auto cursor_lower_right =
         ImVec2(cursor_upper_left.x + 1.0f,
                cursor_upper_left.y + ImGui::GetTextLineHeight());
