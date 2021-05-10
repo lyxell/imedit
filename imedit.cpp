@@ -5,7 +5,7 @@
 
 namespace ImEdit {
 
-static const float number_column_width = 20.0f;
+static const float number_column_width = 25.0f;
 static std::string current_editor;
 static int current_row;
 
