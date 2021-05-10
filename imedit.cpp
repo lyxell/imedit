@@ -55,8 +55,11 @@ bool Highlight(int x0, int x1) {
     auto lower_right = get_lower_right(x0, x1);
     draw_list->AddRectFilled(upper_left, lower_right,
                              IM_COL32(150, 200, 255, 255));
-    return ImGui::IsMouseHoveringRect(upper_left, lower_right) &&
-           ImGui::IsMouseClicked(0);
+    bool hovered = ImGui::IsMouseHoveringRect(upper_left, lower_right);
+    if (hovered) {
+        ImGui::SetMouseCursor(7);
+    }
+    return hovered && ImGui::IsMouseClicked(0);
 }
 
 bool Underline(int x0, int x1) {
@@ -79,9 +82,12 @@ bool Underline(int x0, int x1) {
         curr.x += incr_x;
         bump = !bump;
     }
-    return ImGui::IsMouseHoveringRect(get_upper_left(x0, x1),
-                                      get_lower_right(x0, x1)) &&
-           ImGui::IsMouseClicked(0);
+    bool hovered = ImGui::IsMouseHoveringRect(get_upper_left(x0, x1),
+                                      get_lower_right(x0, x1));
+    if (hovered) {
+        ImGui::SetMouseCursor(7);
+    }
+    return hovered && ImGui::IsMouseClicked(0);
 }
 
 void Cursor(int x) {
