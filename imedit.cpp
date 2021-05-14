@@ -30,7 +30,13 @@ ImVec2 get_lower_left(int x0, int x1) {
                       ImGui::GetTextLineHeight());
 }
 
-void Begin(const char* str) { current_editor = str; }
+void Begin(const char* str) {
+    const ImGuiStyle& style = ImGui::GetStyle();
+    auto item_spacing = style.ItemSpacing;
+    item_spacing.y = 0.0f;
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, item_spacing);
+    current_editor = str;
+}
 
 void Line(const char* str) {
     constexpr int COLUMNS = 2;
@@ -102,6 +108,9 @@ void Cursor(int x) {
     draw_list->AddRectFilled(upper_left, lower_right, IM_COL32(0, 0, 0, 255));
 }
 
-void End() { current_row = 0; }
+void End() {
+    current_row = 0;
+    ImGui::PopStyleVar();
+}
 
 } // namespace ImEdit
