@@ -1,6 +1,8 @@
 #include "imedit.h"
 #include "imgui.h"
 
+#include <cmath>
+#include <iostream>
 #include <string>
 
 namespace ImEdit {
@@ -38,9 +40,10 @@ void Begin(const char* str) {
     current_editor = str;
 }
 
-void Line(const char* str) {
+std::optional<std::pair<int,int>> Line(const char* str) {
     constexpr int COLUMNS = 2;
     current_row++;
+    int pos;
     static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
     if (ImGui::BeginTable((current_editor + "#Line").c_str(), COLUMNS, flags)) {
         ImGui::TableSetupColumn((current_editor + "#number_column").c_str(), 0,
@@ -50,17 +53,22 @@ void Line(const char* str) {
         ImGui::TableNextColumn();
         ImGui::TextDisabled("%d", current_row);
         ImGui::TableNextColumn();
+        pos = ImGui::GetCursorScreenPos().x;
         ImGui::Text("%s", str);
         ImGui::EndTable();
     }
+    if (ImGui::IsItemClicked()) {
+        ImGuiIO& io = ImGui::GetIO();
+        return {{std::max(int(std::round((io.MousePos.x - pos) / ImGui::CalcTextSize("x").x)), 0), current_row - 1}};
+    }
+    return {};
 }
 
-bool Highlight(int x0, int x1) {
+bool Highlight(int x0, int x1, int color) {
     auto* draw_list = ImGui::GetWindowDrawList();
     auto upper_left = get_upper_left(x0, x1);
     auto lower_right = get_lower_right(x0, x1);
-    draw_list->AddRectFilled(upper_left, lower_right,
-                             IM_COL32(150, 200, 255, 255));
+    draw_list->AddRectFilled(upper_left, lower_right, color, 2.0f);
     bool hovered = ImGui::IsMouseHoveringRect(upper_left, lower_right);
     if (hovered) {
         ImGui::SetMouseCursor(7);
@@ -97,6 +105,7 @@ bool Underline(int x0, int x1) {
 }
 
 void Cursor(int x) {
+    static std::pair<int, int> prev_cursor;
     ImGuiStyle& style = ImGui::GetStyle();
     auto* draw_list = ImGui::GetWindowDrawList();
     auto upper_left =
@@ -105,6 +114,10 @@ void Cursor(int x) {
                ImGui::GetCursorScreenPos().y + style.CellPadding.y);
     auto lower_right =
         ImVec2(upper_left.x + 1.0f, upper_left.y + ImGui::GetTextLineHeight());
+    if (std::pair(current_row, x) != prev_cursor && !ImGui::IsRectVisible(upper_left, lower_right)) {
+        ImGui::SetScrollHereY(0.5f);
+    }
+    prev_cursor = {current_row, x};
     draw_list->AddRectFilled(upper_left, lower_right, IM_COL32(0, 0, 0, 255));
 }
 
